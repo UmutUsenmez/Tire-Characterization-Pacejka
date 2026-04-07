@@ -1,6 +1,6 @@
 % MKT4834 - HW3: Tire Modeling
 
-% --- 1. Extracting data from an Excel file --- % 
+% --- 1. Extracting Data from an Excel File --- % 
 
 % VERTICAL LOADS [N]
 Fz1 = 3000;  
@@ -27,3 +27,44 @@ alpha_Mz = [-15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0,
 Mz_3000 = [7.51, 6.99, 6.37, 5.60, 4.67, 3.51, 2.05, 0.22, -2.10, -5.01, -8.51, -12.24, -14.97, -14.53, -9.21, 0, 9.21, 14.53, 14.97, 12.24, 8.51, 5.01, 2.10, -0.22, -2.05, -3.51, -4.67, -5.60, -6.37, -6.99, -7.51];
 Mz_5000 = [21.87, 19.97, 17.67, 14.88, 11.44, 7.19, 1.88, -4.77, -13.06, -23.21, -34.91, -46.47, -53.58, -49.68, -30.52, 0, 30.52, 49.68, 53.58, 46.47, 34.91, 23.21, 13.06, 4.77, -1.88, -7.19, -11.44, -14.88, -17.67, -19.97, -21.87];
 Mz_7000 = [37.62, 33.27, 28.05, 21.74, 14.08, 4.68, -6.90, -21.21, -38.76, -59.69, -82.93, -104.40, -115.12, -102.84, -61.45, 0, 61.45, 102.84, 115.12, 104.40, 82.93, 59.69, 38.76, 21.21, 6.90, -4.68, -14.08, -21.74, -28.05, -33.27, -37.62];
+
+% --- 2. Friction Ellipse Analysis --- % 
+
+% Find Peak Forces
+Fx_peak_1 = max(Fx_3000); Fy_peak_1 = max(Fy_3000);
+Fx_peak_2 = max(Fx_5000); Fy_peak_2 = max(Fy_5000);
+Fx_peak_3 = max(Fx_7000); Fy_peak_3 = max(Fy_7000);
+% 2. Normalize Forces
+mu_x_1 = Fx_peak_1 / Fz1; mu_y_1 = Fy_peak_1 / Fz1;
+mu_x_2 = Fx_peak_2 / Fz2; mu_y_2 = Fy_peak_2 / Fz2;
+mu_x_3 = Fx_peak_3 / Fz3; mu_y_3 = Fy_peak_3 / Fz3;
+% 3. Generate Ellipse Points
+theta = linspace(0, 2*pi, 100);                % Angle vector from 0 to 360 degrees
+% Ellipses are calculated using the formulas x = a*cos(theta), y = b*sin(theta)
+x_ell_1 = mu_x_1 * cos(theta); y_ell_1 = mu_y_1 * sin(theta);
+x_ell_2 = mu_x_2 * cos(theta); y_ell_2 = mu_y_2 * sin(theta);
+x_ell_3 = mu_x_3 * cos(theta); y_ell_3 = mu_y_3 * sin(theta);
+% 4. Plotting
+figure('Name', 'Q1: Friction Ellipses', 'Color', 'w');      % window settings
+hold on; grid on;
+% Drawing ellipses
+plot(x_ell_1, y_ell_1, 'b-', 'LineWidth', 2, 'DisplayName', 'Fz1 = 3000 N');
+plot(x_ell_2, y_ell_2, 'g-', 'LineWidth', 2, 'DisplayName', 'Fz2 = 5000 N');
+plot(x_ell_3, y_ell_3, 'r-', 'LineWidth', 2, 'DisplayName', 'Fz3 = 7000 N');
+% Pure slip points marking
+% Fz1 Points
+plot([mu_x_1, -mu_x_1], [0, 0], 'bo', 'MarkerFaceColor', 'b', 'HandleVisibility', 'off');
+plot([0, 0], [mu_y_1, -mu_y_1], 'bo', 'MarkerFaceColor', 'b', 'HandleVisibility', 'off');
+% Fz2 Points
+plot([mu_x_2, -mu_x_2], [0, 0], 'go', 'MarkerFaceColor', 'g', 'HandleVisibility', 'off');
+plot([0, 0], [mu_y_2, -mu_y_2], 'go', 'MarkerFaceColor', 'g', 'HandleVisibility', 'off');
+% Fz3 Points
+plot([mu_x_3, -mu_x_3], [0, 0], 'ro', 'MarkerFaceColor', 'r', 'HandleVisibility', 'off');
+plot([0, 0], [mu_y_3, -mu_y_3], 'ro', 'MarkerFaceColor', 'r', 'HandleVisibility', 'off');
+% Graphics Settings
+title('Normalized Friction Ellipses for Different Vertical Loads', 'FontWeight', 'bold');
+xlabel('Normalized Longitudinal Force (Fx / Fz) [-]', 'FontWeight', 'bold');
+ylabel('Normalized Lateral Force (Fy / Fz) [-]', 'FontWeight', 'bold');
+legend('Location', 'best');
+axis equal;                          % We align the axes to prevent the ellipses from losing their shape.
+xlim([-1.5 1.5]); ylim([-1.5 1.5]);
