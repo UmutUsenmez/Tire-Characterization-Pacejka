@@ -68,3 +68,68 @@ ylabel('Normalized Lateral Force (Fy / Fz) [-]', 'FontWeight', 'bold');
 legend('Location', 'best');
 axis equal;                          % We align the axes to prevent the ellipses from losing their shape.
 xlim([-1.5 1.5]); ylim([-1.5 1.5]);
+
+% --- 3. Cornering Stiffness & Pneumatic Trail --- % 
+
+% Cornering Stiffness (Ca) Determination
+alpha_lin = [0, 1, 2];               % Data for linear regression (alpha <= 2 degrees)
+Fy_lin_1 = [0, 947.39, 1698.99];
+Fy_lin_2 = [0, 1497.99, 2742.22];
+Fy_lin_3 = [0, 1925.80, 3607.18];
+% Linear regression (polyfit) to find the slope (Ca in N/deg)
+p1 = polyfit(alpha_lin, Fy_lin_1, 1); Ca1_deg = p1(1);
+p2 = polyfit(alpha_lin, Fy_lin_2, 1); Ca2_deg = p2(1);
+p3 = polyfit(alpha_lin, Fy_lin_3, 1); Ca3_deg = p3(1);
+% Convert Ca from N/deg to N/rad (1 rad = 180/pi deg)
+Ca1_rad = Ca1_deg * (180/pi);
+Ca2_rad = Ca2_deg * (180/pi);
+Ca3_rad = Ca3_deg * (180/pi);
+% Printing the calculated angle and radian values ​​to the screen.
+fprintf('\n--- Cornering Stiffness (Ca) ---\n');
+fprintf('Fz = 3000 N : %.2f N/deg  |  %.2f N/rad\n', Ca1_deg, Ca1_rad);
+fprintf('Fz = 5000 N : %.2f N/deg  |  %.2f N/rad\n', Ca2_deg, Ca2_rad);
+fprintf('Fz = 7000 N : %.2f N/deg  |  %.2f N/rad\n', Ca3_deg, Ca3_rad);
+% Fit Pacejka Exponential Model: Ca = p * Fz * exp(-q * Fz)
+Fz_vec = [Fz1, Fz2, Fz3];
+Ca_rad_vec = [Ca1_rad, Ca2_rad, Ca3_rad];
+y_fit = log(Ca_rad_vec ./ Fz_vec);     % Linearization for curve fitting: log(Ca / Fz) = log(p) - q * Fz
+p_fit = polyfit(Fz_vec, y_fit, 1);
+q_opt = -p_fit(1);
+p_opt = exp(p_fit(2));
+% Window settings of Ca vs Fz
+figure('Name', 'Q2: Cornering Stiffness vs Vertical Load', 'Color', 'w');
+hold on; grid on;
+% plotting Ca vs Fz 
+plot(Fz_vec, Ca_rad_vec, 'ko', 'MarkerSize', 8, 'MarkerFaceColor', 'k', 'DisplayName', 'Measured Ca');
+% Smooth curve for the fit
+Fz_plot = linspace(0, 8000, 100);
+Ca_fit = p_opt .* Fz_plot .* exp(-q_opt .* Fz_plot);
+plot(Fz_plot, Ca_fit, 'b--', 'LineWidth', 2, 'DisplayName', 'Pacejka Fit: p*Fz*exp(-q*Fz)');
+% Graphics Settings
+title('Cornering Stiffness (Ca) vs. Vertical Load (Fz)', 'FontWeight', 'bold');
+xlabel('Vertical Load Fz [N]', 'FontWeight', 'bold');
+ylabel('Cornering Stiffness Ca [N/rad]', 'FontWeight', 'bold');
+legend('Location', 'best');
+xlim([0 8000]); ylim([0 max(Ca_fit)*1.1]);
+% Pneumatic Trail (t) Calculation
+% Extract positive slip angles to avoid division by zero at alpha = 0
+idx_pos = (alpha_Fy > 0); 
+alpha_pos = alpha_Fy(idx_pos);
+% Calculate pneumatic trail: t = -Mz / Fy
+t_1 = -Mz_3000(idx_pos) ./ Fy_3000(idx_pos);
+t_2 = -Mz_5000(idx_pos) ./ Fy_5000(idx_pos);
+t_3 = -Mz_7000(idx_pos) ./ Fy_7000(idx_pos);
+% Window settings of Pneumatic Trail vs Slip Angle
+figure('Name', 'Q3: Pneumatic Trail', 'Color', 'w');
+hold on; grid on;
+% Plot Pneumatic Trail vs Slip Angle
+plot(alpha_pos, t_1, 'b-o', 'LineWidth', 1.5, 'DisplayName', 'Fz1 = 3000 N');
+plot(alpha_pos, t_2, 'g-o', 'LineWidth', 1.5, 'DisplayName', 'Fz2 = 5000 N');
+plot(alpha_pos, t_3, 'r-o', 'LineWidth', 1.5, 'DisplayName', 'Fz3 = 7000 N');
+% Plot a zero line to easily spot the zero-crossing
+yline(0, 'k--', 'HandleVisibility', 'off');
+% Graphics Settings
+title('Pneumatic Trail (t) vs. Slip Angle (\alpha)', 'FontWeight', 'bold');
+xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
+ylabel('Pneumatic Trail t [m]', 'FontWeight', 'bold');
+legend('Location', 'best');
