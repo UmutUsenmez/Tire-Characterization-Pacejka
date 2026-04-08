@@ -1,6 +1,6 @@
 % MKT4834 - HW3: Tire Modeling
 
-% --- 1. Extracting Data from an Excel File --- % 
+% --- 1. Raw Tire Data Definition --- %
 
 % VERTICAL LOADS [N]
 Fz1 = 3000;  
@@ -198,7 +198,7 @@ fprintf('\n--- Magic Formula Parameters (B, C, D, E) ---\n');
 fprintf('Fz1 (3000 N) -> B=%.4f, C=%.4f, D=%.1f, E=%.4f\n', par_1(1), par_1(2), par_1(3), par_1(4));
 fprintf('Fz2 (5000 N) -> B=%.4f, C=%.4f, D=%.1f, E=%.4f\n', par_2(1), par_2(2), par_2(3), par_2(4));
 fprintf('Fz3 (7000 N) -> B=%.4f, C=%.4f, D=%.1f, E=%.4f\n', par_3(1), par_3(2), par_3(3), par_3(4));
-% RMSE and R^2 (Reason for Error) Calculations
+% RMSE (Root Mean Square Error) and R^2 Calculations
 Fy_model_1 = MF_eq(par_1, alpha_Fy);
 Fy_model_2 = MF_eq(par_2, alpha_Fy);
 Fy_model_3 = MF_eq(par_3, alpha_Fy);
@@ -222,7 +222,7 @@ hold on; grid on;
 plot(alpha_Fy, Fy_3000, 'bo', 'MarkerFaceColor','w', 'DisplayName', 'Measured Data (3000 N)');
 plot(alpha_Fy, Fy_5000, 'go', 'MarkerFaceColor','w', 'DisplayName', 'Measured Data (5000 N)');
 plot(alpha_Fy, Fy_7000, 'ro', 'MarkerFaceColor','w', 'DisplayName', 'Measured Data (7000 N)');
-% Pre-fit Magic Formula Solid lines
+% Fitted Magic Formula Solid lines
 plot(alpha_plot, MF_eq(par_1, alpha_plot), 'b-', 'LineWidth', 1.5, 'DisplayName', 'Magic Formula (3000 N)');
 plot(alpha_plot, MF_eq(par_2, alpha_plot), 'g-', 'LineWidth', 1.5, 'DisplayName', 'Magic Formula (5000 N)');
 plot(alpha_plot, MF_eq(par_3, alpha_plot), 'r-', 'LineWidth', 1.5, 'DisplayName', 'Magic Formula (7000 N)');
