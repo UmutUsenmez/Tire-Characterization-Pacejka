@@ -16,25 +16,25 @@ This repository contains a comprehensive MATLAB-based analysis of vehicle tire d
 
 ### 1. Pacejka Magic Formula Validation
 The core of the project involves optimizing the Magic Formula ($F_y = D \cdot \sin(C \cdot \arctan(B\alpha - E(B\alpha - \arctan(B\alpha))))$) parameters. The model achieves an $R^2$ of 1.0000, perfectly matching the measured data.
-![Magic Formula Validation](MF_validation.png)
+![Magic Formula Validation](Results/MF_validation.png)
 
 ### 2. Normalized Friction Ellipses
 Demonstrating the combined force limits. Notice how the normalized capability ($\mu$) decreases as the vertical load increases, validating tire load sensitivity.
-![Friction Ellipses](Normalized_Friction_Elipses.png)
+![Friction Ellipses](Results/Normalized_Friction_Elipses.png)
 
 ### 3. Cornering Stiffness vs. Vertical Load
 A regression analysis of cornering stiffness ($C_\alpha$) modeled with the Pacejka exponential fit: $C_\alpha = p \cdot F_z \cdot \exp(-q \cdot F_z)$.
-![Cornering Stiffness](Ca_vs_Fz.png)
+![Cornering Stiffness](Results/Ca_vs_Fz.png)
 
 ### 4. Pneumatic Trail Analysis
 The pneumatic trail ($t = -M_z / F_y$) plotted against slip angles, highlighting the critical zero-crossing points where self-aligning torque shifts direction.
-![Pneumatic Trail](t_vs_a.png)
+![Pneumatic Trail](Results/t_vs_a.png)
 
 ### 5. Combined Slip Dynamics
 Estimations of how longitudinal ($F_x$) and lateral ($F_y$) forces degrade when the tire is subjected to combined slip demands.
 | Lateral Force at $s = 0.1$ | Longitudinal Force at $\alpha = 5^\circ$ |
 | :---: | :---: |
-| ![Combined Fx vs Alpha](Combined_Fx_vs_a.png) | ![Combined Fy vs Slip](Combined_Fy_vs_s.png) |
+| ![Combined Fx vs Alpha](Results/Combined_Fx_vs_a.png) | ![Combined Fy vs Slip](Results/Combined_Fy_vs_s.png) |
 
 ---
 *Developed by a Mechatronics Engineering Student for MKT4834 - Spring 2026*
