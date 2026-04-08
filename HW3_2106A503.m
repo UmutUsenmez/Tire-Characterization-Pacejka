@@ -133,3 +133,42 @@ title('Pneumatic Trail (t) vs. Slip Angle (\alpha)', 'FontWeight', 'bold');
 xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
 ylabel('Pneumatic Trail t [m]', 'FontWeight', 'bold');
 legend('Location', 'best');
+
+% --- 4. Combined Loading Condition (Friction Ellipse Approximation) --- % 
+
+% Lateral Force at Constant Slip Angle (alpha = 5 deg)
+alpha_const = 5;
+s_test = [-0.1, 0, 0.1, 0.2];     % given slip rates
+% The relevant values ​​are for Fz2 = 5000 N.
+Fy_pure_5deg = interp1(alpha_Fy, Fy_5000, alpha_const);    % Fy (alpha=5)
+Fx_pure_s = interp1(s_Fx, Fx_5000, s_test);                % Fx's at that moment
+Fx_peak_abs = max(abs(Fx_5000));                           % Absolute Fx peak
+% Friction ellipse formula combined with Fy calculation
+Fy_comb = Fy_pure_5deg .* sqrt(max(0, 1 - (Fx_pure_s ./ Fx_peak_abs).^2));     % The max command prevents the square root from going into the negative.
+% Window settings and Plotting
+figure('Name', 'Q4a: Combined Slip (Fy vs s)', 'Color', 'w');
+plot(s_test, Fy_comb, 'b-o', 'LineWidth', 2, 'MarkerFaceColor', 'b', 'MarkerSize', 6);
+grid on;
+% Graphics Settings
+title('Combined Lateral Force (F_y) vs. Slip Ratio (s) at \alpha = 5^\circ', 'FontWeight', 'bold');
+xlabel('Slip Ratio (s) [-]', 'FontWeight', 'bold');
+ylabel('Estimated Combined Lateral Force F_{y,comb} [N]', 'FontWeight', 'bold');
+ylim([0 5000]); xlim([-0.15 0.25]);
+% Longitudinal Force at Constant Slip Ratio (s = 0.1)
+s_const = 0.1;
+alpha_test = [0, 2, 4, 6];        % given sliding angles
+% The relevant values ​​are for Fz2 = 5000 N.
+Fx_pure_01 = interp1(s_Fx, Fx_5000, s_const);              % Fx (s=0.1)
+Fy_pure_alpha = interp1(alpha_Fy, Fy_5000, alpha_test);    % Fy's at that moment
+Fy_peak_abs = max(abs(Fy_5000));                           % Absolute Fy peak
+% Fx calculation combined with the friction ellipse formula
+Fx_comb = Fx_pure_01 .* sqrt(max(0, 1 - (Fy_pure_alpha ./ Fy_peak_abs).^2));
+% Window settings and Plotting
+figure('Name', 'Q4b: Combined Slip (Fx vs alpha)', 'Color', 'w');
+plot(alpha_test, Fx_comb, 'r-o', 'LineWidth', 2, 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+grid on;
+% Graphics Settings
+title('Combined Longitudinal Force (F_x) vs. Slip Angle (\alpha) at s = 0.1', 'FontWeight', 'bold');
+xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
+ylabel('Estimated Combined Longitudinal Force F_{x,comb} [N]', 'FontWeight', 'bold');
+ylim([0 6000]); xlim([-1 7]);
