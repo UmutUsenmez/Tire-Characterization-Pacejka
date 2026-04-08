@@ -172,3 +172,66 @@ title('Combined Longitudinal Force (F_x) vs. Slip Angle (\alpha) at s = 0.1', 'F
 xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
 ylabel('Estimated Combined Longitudinal Force F_{x,comb} [N]', 'FontWeight', 'bold');
 ylim([0 6000]); xlim([-1 7]);
+
+% --- 5. Pacejka 'Magic Formula' Parameter Identification --- % 
+
+% Magic Formula Equation (x(1)=B, x(2)=C, x(3)=D, x(4)=E)
+MF_eq = @(x, alpha) x(3) .* sin(x(2) .* atan(x(1).*alpha - x(4).*(x(1).*alpha - atan(x(1).*alpha))));
+% Optimization Settings
+options = optimset('Display', 'off');
+lb = [0, 0, 0, -5];                       % (Lower bounds)
+ub = [Inf, Inf, Inf, 1];                  % Physical constraint E ≤ 1 during adaptation
+% Initial guesses [B, C, D, E]
+% D (Peak Factor): This is the peak point of the curve. Therefore, we can consider the highest point of our data as the starting point
+% C (Shape Factor): In the literature, this value has been proven to be around 1.3 for lateral forces
+% B (Stiffness Factor): The initial slope at the origin is equal to B*C*D.
+% And Our gradient was approximately 1500 N/deg so B is approximately 0.2
+guess_1 = [0.2, 1.3, max(Fy_3000), 0];
+guess_2 = [0.2, 1.3, max(Fy_5000), 0];
+guess_3 = [0.2, 1.3, max(Fy_7000), 0];
+% Curve Fitting with lsqcurvefit
+[par_1, res1] = lsqcurvefit(MF_eq, guess_1, alpha_Fy, Fy_3000, lb, ub, options);
+[par_2, res2] = lsqcurvefit(MF_eq, guess_2, alpha_Fy, Fy_5000, lb, ub, options);
+[par_3, res3] = lsqcurvefit(MF_eq, guess_3, alpha_Fy, Fy_7000, lb, ub, options);
+% Printing the obtained parameters B, C, D, E to the screen
+fprintf('\n--- Magic Formula Parameters (B, C, D, E) ---\n');
+fprintf('Fz1 (3000 N) -> B=%.4f, C=%.4f, D=%.1f, E=%.4f\n', par_1(1), par_1(2), par_1(3), par_1(4));
+fprintf('Fz2 (5000 N) -> B=%.4f, C=%.4f, D=%.1f, E=%.4f\n', par_2(1), par_2(2), par_2(3), par_2(4));
+fprintf('Fz3 (7000 N) -> B=%.4f, C=%.4f, D=%.1f, E=%.4f\n', par_3(1), par_3(2), par_3(3), par_3(4));
+% RMSE and R^2 (Reason for Error) Calculations
+Fy_model_1 = MF_eq(par_1, alpha_Fy);
+Fy_model_2 = MF_eq(par_2, alpha_Fy);
+Fy_model_3 = MF_eq(par_3, alpha_Fy);
+n = length(alpha_Fy);
+RMSE_1 = sqrt(sum((Fy_3000 - Fy_model_1).^2)/n);
+RMSE_2 = sqrt(sum((Fy_5000 - Fy_model_2).^2)/n);
+RMSE_3 = sqrt(sum((Fy_7000 - Fy_model_3).^2)/n);
+R2_1 = 1 - sum((Fy_3000 - Fy_model_1).^2) / sum((Fy_3000 - mean(Fy_3000)).^2);
+R2_2 = 1 - sum((Fy_5000 - Fy_model_2).^2) / sum((Fy_5000 - mean(Fy_5000)).^2);
+R2_3 = 1 - sum((Fy_7000 - Fy_model_3).^2) / sum((Fy_7000 - mean(Fy_7000)).^2);
+% Printing the RMSE and R^2
+fprintf('\n--- Model Validation (RMSE & R^2) ---\n');
+fprintf('Fz1 (3000 N) | RMSE: %6.2f N | R^2: %.4f\n', RMSE_1, R2_1);
+fprintf('Fz2 (5000 N) | RMSE: %6.2f N | R^2: %.4f\n', RMSE_2, R2_2);
+fprintf('Fz3 (7000 N) | RMSE: %6.2f N | R^2: %.4f\n', RMSE_3, R2_3);
+% Window settings and Plotting
+alpha_plot = linspace(-16, 16, 200);
+figure('Name', 'Q5c: Magic Formula Validation', 'Color', 'w');
+hold on; grid on;
+% Actual Data Points (Open Circles)
+plot(alpha_Fy, Fy_3000, 'bo', 'MarkerFaceColor','w', 'DisplayName', 'Measured Data (3000 N)');
+plot(alpha_Fy, Fy_5000, 'go', 'MarkerFaceColor','w', 'DisplayName', 'Measured Data (5000 N)');
+plot(alpha_Fy, Fy_7000, 'ro', 'MarkerFaceColor','w', 'DisplayName', 'Measured Data (7000 N)');
+% Pre-fit Magic Formula Solid lines
+plot(alpha_plot, MF_eq(par_1, alpha_plot), 'b-', 'LineWidth', 1.5, 'DisplayName', 'Magic Formula (3000 N)');
+plot(alpha_plot, MF_eq(par_2, alpha_plot), 'g-', 'LineWidth', 1.5, 'DisplayName', 'Magic Formula (5000 N)');
+plot(alpha_plot, MF_eq(par_3, alpha_plot), 'r-', 'LineWidth', 1.5, 'DisplayName', 'Magic Formula (7000 N)');
+% Graphic Settings
+title('Magic Formula Fit vs. Measured Tire Data', 'FontWeight', 'bold');
+xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
+ylabel('Lateral Force F_y [N]', 'FontWeight', 'bold');
+legend('Location', 'northwest');
+xlim([-16 16]);
+
+
+
