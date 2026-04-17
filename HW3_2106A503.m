@@ -89,6 +89,26 @@ fprintf('\n--- Cornering Stiffness (Ca) ---\n');
 fprintf('Fz = 3000 N : %.2f N/deg  |  %.2f N/rad\n', Ca1_deg, Ca1_rad);
 fprintf('Fz = 5000 N : %.2f N/deg  |  %.2f N/rad\n', Ca2_deg, Ca2_rad);
 fprintf('Fz = 7000 N : %.2f N/deg  |  %.2f N/rad\n', Ca3_deg, Ca3_rad);
+% Linear Regression plot
+% Window settings
+figure('Name', 'Q2a: Linear Regression for Cornering Stiffness', 'Color', 'w');
+hold on; grid on;
+% Plotting 
+plot(alpha_lin, Fy_lin_1, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 6, 'DisplayName', 'Data Fz1 (3000 N)');
+plot(alpha_lin, Fy_lin_2, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6, 'DisplayName', 'Data Fz2 (5000 N)');
+plot(alpha_lin, Fy_lin_3, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6, 'DisplayName', 'Data Fz3 (7000 N)');
+% linear lines (y = m*x)
+alpha_plot_lin = linspace(0, 2.5, 50);
+% Plotting 
+plot(alpha_plot_lin, Ca1_deg * alpha_plot_lin, 'b--', 'LineWidth', 1.5, 'DisplayName', 'Linear Fit Fz1');
+plot(alpha_plot_lin, Ca2_deg * alpha_plot_lin, 'g--', 'LineWidth', 1.5, 'DisplayName', 'Linear Fit Fz2');
+plot(alpha_plot_lin, Ca3_deg * alpha_plot_lin, 'r--', 'LineWidth', 1.5, 'DisplayName', 'Linear Fit Fz3');
+% Graphics Settings 
+title('Linear Regression for Cornering Stiffness', 'FontWeight', 'bold');
+xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
+ylabel('Lateral Force F_y [N]', 'FontWeight', 'bold');
+legend('Location', 'northwest');
+xlim([0 2.5]); ylim([0 4000]);
 % Fit Pacejka Exponential Model: Ca = p * Fz * exp(-q * Fz)
 Fz_vec = [Fz1, Fz2, Fz3];
 Ca_rad_vec = [Ca1_rad, Ca2_rad, Ca3_rad];
@@ -97,7 +117,7 @@ p_fit = polyfit(Fz_vec, y_fit, 1);
 q_opt = -p_fit(1);
 p_opt = exp(p_fit(2));
 % Window settings of Ca vs Fz
-figure('Name', 'Q2: Cornering Stiffness vs Vertical Load', 'Color', 'w');
+figure('Name', 'Q2b: Cornering Stiffness vs Vertical Load', 'Color', 'w');
 hold on; grid on;
 % plotting Ca vs Fz 
 plot(Fz_vec, Ca_rad_vec, 'ko', 'MarkerSize', 8, 'MarkerFaceColor', 'k', 'DisplayName', 'Measured Ca');
@@ -111,30 +131,57 @@ xlabel('Vertical Load Fz [N]', 'FontWeight', 'bold');
 ylabel('Cornering Stiffness Ca [N/rad]', 'FontWeight', 'bold');
 legend('Location', 'best');
 xlim([0 8000]); ylim([0 max(Ca_fit)*1.1]);
-% Pneumatic Trail (t) Calculation
-% Extract positive slip angles to avoid division by zero at alpha = 0
-idx_pos = (alpha_Fy > 0); 
-alpha_pos = alpha_Fy(idx_pos);
-% Calculate pneumatic trail: t = -Mz / Fy
-t_1 = -Mz_3000(idx_pos) ./ Fy_3000(idx_pos);
-t_2 = -Mz_5000(idx_pos) ./ Fy_5000(idx_pos);
-t_3 = -Mz_7000(idx_pos) ./ Fy_7000(idx_pos);
-% Window settings of Pneumatic Trail vs Slip Angle
-figure('Name', 'Q3: Pneumatic Trail', 'Color', 'w');
+
+% --- 4. Self-Aligning Moment and Pneumatic Trail --- % 
+
+% Aligning Moment vs Slip Angle
+% Window settings
+figure('Name', 'Q3a: Aligning Moment vs Slip Angle', 'Color', 'w');
 hold on; grid on;
-% Plot Pneumatic Trail vs Slip Angle
+% Plotting
+idx_mz_pos = (alpha_Mz >= 0);               % positive part
+plot(alpha_Mz(idx_mz_pos), Mz_3000(idx_mz_pos), 'b-', 'LineWidth', 2, 'DisplayName', 'Fz1 = 3000 N');
+plot(alpha_Mz(idx_mz_pos), Mz_5000(idx_mz_pos), 'g-', 'LineWidth', 2, 'DisplayName', 'Fz2 = 5000 N');
+plot(alpha_Mz(idx_mz_pos), Mz_7000(idx_mz_pos), 'r-', 'LineWidth', 2, 'DisplayName', 'Fz3 = 7000 N');
+% Graphics Settings
+title('Aligning Moment (M_z) vs. Slip Angle (\alpha)', 'FontWeight', 'bold');
+xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
+ylabel('Aligning Moment M_z [N\cdotm]', 'FontWeight', 'bold');
+legend('Location', 'best');
+xlim([0 15]);
+% Pneumatic Trail (t) Calculation & Plot
+alpha_pos = 1:15; % Use strictly positive angles (1 to 15 deg) to avoid division by zero
+% Use interp1 to match arrays perfectly and avoid index mismatch errors
+Fy_pos_1 = interp1(alpha_Fy, Fy_3000, alpha_pos);
+Fy_pos_2 = interp1(alpha_Fy, Fy_5000, alpha_pos);
+Fy_pos_3 = interp1(alpha_Fy, Fy_7000, alpha_pos);
+Mz_pos_1 = interp1(alpha_Mz, Mz_3000, alpha_pos);
+Mz_pos_2 = interp1(alpha_Mz, Mz_5000, alpha_pos);
+Mz_pos_3 = interp1(alpha_Mz, Mz_7000, alpha_pos);
+% Calculate pneumatic trail: t = Mz / Fy 
+t_1 = Mz_pos_1 ./ Fy_pos_1;
+t_2 = Mz_pos_2 ./ Fy_pos_2;
+t_3 = Mz_pos_3 ./ Fy_pos_3;
+% Window settings
+figure('Name', 'Q3b: Pneumatic Trail', 'Color', 'w');
+hold on; grid on;
+% Plotting 
 plot(alpha_pos, t_1, 'b-o', 'LineWidth', 1.5, 'DisplayName', 'Fz1 = 3000 N');
 plot(alpha_pos, t_2, 'g-o', 'LineWidth', 1.5, 'DisplayName', 'Fz2 = 5000 N');
 plot(alpha_pos, t_3, 'r-o', 'LineWidth', 1.5, 'DisplayName', 'Fz3 = 7000 N');
-% Plot a zero line to easily spot the zero-crossing
-yline(0, 'k--', 'HandleVisibility', 'off');
+yline(0, 'k--', 'HandleVisibility', 'off');    % Plot a zero line to easily spot the zero-crossing
 % Graphics Settings
 title('Pneumatic Trail (t) vs. Slip Angle (\alpha)', 'FontWeight', 'bold');
 xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
 ylabel('Pneumatic Trail t [m]', 'FontWeight', 'bold');
 legend('Location', 'best');
+% Printing command window
+fprintf('\n--- Nominal Pneumatic Trail (t) at alpha = 1 deg ---\n');
+fprintf('Fz1 (3000 N) : %.4f m\n', t_1(1));
+fprintf('Fz2 (5000 N) : %.4f m\n', t_2(1));
+fprintf('Fz3 (7000 N) : %.4f m\n', t_3(1));
 
-% --- 4. Combined Loading Condition (Friction Ellipse Approximation) --- % 
+% --- 5. Combined Loading Condition (Friction Ellipse Approximation) --- % 
 
 % Lateral Force at Constant Slip Angle (alpha = 5 deg)
 alpha_const = 5;
@@ -173,7 +220,7 @@ xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
 ylabel('Estimated Combined Longitudinal Force F_{x,comb} [N]', 'FontWeight', 'bold');
 ylim([0 6000]); xlim([-1 7]);
 
-% --- 5. Pacejka 'Magic Formula' Parameter Identification --- % 
+% --- 6. Pacejka 'Magic Formula' Parameter Identification --- % 
 
 % Magic Formula Equation (x(1)=B, x(2)=C, x(3)=D, x(4)=E)
 MF_eq = @(x, alpha) x(3) .* sin(x(2) .* atan(x(1).*alpha - x(4).*(x(1).*alpha - atan(x(1).*alpha))));
@@ -232,6 +279,44 @@ xlabel('Slip Angle \alpha [deg]', 'FontWeight', 'bold');
 ylabel('Lateral Force F_y [N]', 'FontWeight', 'bold');
 legend('Location', 'northwest');
 xlim([-16 16]);
-
+% Load-Dependent Parameters (a1 - a8) Regression
+Fz_kN = [Fz1, Fz2, Fz3] / 1000;   % Fz loads in kN for standard Pacejka formulation
+% a1 and a2 (Regression over friction coefficient mu_y)
+% D = mu_y * Fz = (a1 * Fz + a2) * Fz
+mu_y_vec = [par_1(3)/Fz1, par_2(3)/Fz2, par_3(3)/Fz3];
+p_mu = polyfit(Fz_kN, mu_y_vec, 1);
+a1 = p_mu(1);
+a2 = p_mu(2);
+% a6 and a7 (Regression over curvature factor E)
+% E = a6 * Fz + a7
+E_vec = [par_1(4), par_2(4), par_3(4)];
+p_E = polyfit(Fz_kN, E_vec, 1);
+a6 = p_E(1);
+a7 = p_E(2);
+% a0 (Shape factor C is treated as constant)
+a0 = mean([par_1(2), par_2(2), par_3(2)]);
+% a3 and a4 (Regression over Cornering Stiffness Ca = B*C*D)
+% Ca = a3 * sin(2 * atan(Fz / a4))
+Ca_vec = [par_1(1)*par_1(2)*par_1(3), par_2(1)*par_2(2)*par_2(3), par_3(1)*par_3(2)*par_3(3)];
+Ca_eq = @(a, Fz) a(1) .* sin(2 .* atan(Fz ./ a(2)));
+% a3 (max Ca) and a4 via lsqcurvefit
+opt_a = optimset('Display','off');
+a_res = lsqcurvefit(Ca_eq, [max(Ca_vec), 5], Fz_kN, Ca_vec, [], [], opt_a);
+a3 = a_res(1);
+a4 = a_res(2);
+% a5 and a8 (Dependent on camber angle, assumed 0)
+a5 = 0;
+a8 = 0;
+% Printing the load-dependent parameters to the screen
+fprintf('\n--- Load-Dependent Parameters (a1-a8) ---\n');
+fprintf('a0 (C) = %8.4f\n', a0);
+fprintf('a1     = %8.4f [1/kN]\n', a1);
+fprintf('a2     = %8.4f\n', a2);
+fprintf('a3     = %8.4f [N/deg]\n', a3);
+fprintf('a4     = %8.4f [kN]\n', a4);
+fprintf('a5     = %8.4f (Camber effect - assumed 0)\n', a5);
+fprintf('a6     = %8.4f [1/kN]\n', a6);
+fprintf('a7     = %8.4f\n', a7);
+fprintf('a8     = %8.4f (Camber effect - assumed 0)\n', a8);
 
 
