@@ -1,14 +1,14 @@
 # Pacejka Tire Modeling & Optimization 🏎️
 
-This repository contains a comprehensive MATLAB-based analysis of vehicle tire dynamics using experimental data. Developed as part of the **MKT4834 Introduction to Vehicle Dynamics** course, this project focuses on tire force characterization, combined slip approximations, and the optimization of Pacejka's Magic Formula parameters.
+This repository contains a comprehensive MATLAB-based analysis of vehicle tire dynamics using experimental data. Developed as part of the **MKT4834 Introduction to Vehicle Dynamics** course, this project focuses on tire force characterization, combined slip approximations, and the optimization of Pacejka's Magic Formula parameters, including load-dependent coefficients ($a_1-a_8$).
 
 ## 📌 Project Highlights
 * **Data Processing:** Extraction and handling of raw experimental tire data ($F_x$, $F_y$, $M_z$) under various vertical loads ($F_z$: 3000N, 5000N, 7000N).
 * **Friction Ellipse:** Visualization of normalized longitudinal and lateral force capacities, demonstrating tire load sensitivity.
 * **Cornering Stiffness ($C_\alpha$):** Linear regression at low slip angles and derivation of Pacejka's exponential load-dependent model.
-* **Pneumatic Trail ($t$):** Calculation and zero-crossing analysis of the pneumatic trail using aligning torque and lateral force data.
+* **Self-Aligning Moment & Pneumatic Trail:** Analysis of $M_z$ and calculation of the pneumatic trail ($t$) zero-crossing points.
 * **Combined Slip Estimation:** Predictive modeling of tire forces under simultaneous longitudinal and lateral slip using friction ellipse boundaries.
-* **Magic Formula Optimization:** Reverse-engineering the foundational tire parameters ($B, C, D, E$) using nonlinear least-squares curve fitting (`lsqcurvefit`), achieving a perfect validation fit ($R^2 = 1.0000$).
+* **Magic Formula Optimization:** Reverse-engineering the foundational tire parameters ($B, C, D, E$) using nonlinear least-squares curve fitting (`lsqcurvefit`), and expanding to load-dependent coefficients ($a_1-a_8$).
 
 ---
 
@@ -22,13 +22,17 @@ The core of the project involves optimizing the Magic Formula ($F_y = D \cdot \s
 Demonstrating the combined force limits. Notice how the normalized capability ($\mu$) decreases as the vertical load increases, validating tire load sensitivity.
 ![Friction Ellipses](Results/Normalized_Friction_Elipses.png)
 
-### 3. Cornering Stiffness vs. Vertical Load
-A regression analysis of cornering stiffness ($C_\alpha$) modeled with the Pacejka exponential fit: $C_\alpha = p \cdot F_z \cdot \exp(-q \cdot F_z)$.
-![Cornering Stiffness](Results/Ca_vs_Fz.png)
+### 3. Cornering Stiffness Analysis
+Extracting cornering stiffness ($C_\alpha$) via linear regression at low slip angles, followed by a Pacejka exponential fit: $C_\alpha = p \cdot F_z \cdot \exp(-q \cdot F_z)$.
+| Linear Regression ($C_\alpha$) | Pacejka Exponential Fit |
+| :---: | :---: |
+| ![Linear Regression](Results/Linear_Reg_for_cs.png) | ![Cornering Stiffness](Results/Ca_vs_Fz.png) |
 
-### 4. Pneumatic Trail Analysis
-The pneumatic trail ($t = -M_z / F_y$) plotted against slip angles, highlighting the critical zero-crossing points where self-aligning torque shifts direction.
-![Pneumatic Trail](Results/t_vs_a.png)
+### 4. Self-Aligning Moment & Pneumatic Trail
+Analyzing the self-aligning torque ($M_z$) and the resulting pneumatic trail ($t = -M_z / F_y$) to identify critical zero-crossing points where self-aligning torque shifts direction.
+| Aligning Moment ($M_z$) | Pneumatic Trail ($t$) |
+| :---: | :---: |
+| ![Aligning Moment](Results/Mz_vs_a.png) | ![Pneumatic Trail](Results/pneumatic_trail_vs_a.png) |
 
 ### 5. Combined Slip Dynamics
 Estimations of how longitudinal ($F_x$) and lateral ($F_y$) forces degrade when the tire is subjected to combined slip demands.
